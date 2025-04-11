@@ -1,16 +1,12 @@
-import { createRoute} from '@tanstack/react-router'
-import {RootRoute} from "@/routes/__root";
-import {RichTextEditor} from "@/components/richtext";
+import { RootRoute } from "@/routes/__root";
+import { createRoute } from "@tanstack/react-router";
 
 export const IndexRoute = createRoute({
-    getParentRoute: () => RootRoute,
-    path: '/',
-    component: Index
-})
-
+	getParentRoute: () => RootRoute,
+	path: "/",
+	component: Index,
+});
 
 function Index() {
-  return (
-  <></>
-  )
+	return <></>;
 }

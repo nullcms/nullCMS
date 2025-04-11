@@ -1,1 +1,1 @@
-export type StorageType = 'lowstorage' | 'other-future-storage';
+export type StorageType = "lowstorage" | "other-future-storage";

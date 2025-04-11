@@ -1,14 +1,12 @@
 {
-  "extends": "@nullcms/typescript-config/vite.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@nullcms/backoffice/*": ["./src/*"],
-      "@/*": [
-        "./src/*"
-      ]
-    }
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
+	"extends": "@nullcms/typescript-config/vite.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@nullcms/backoffice/*": ["./src/*"],
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["."],
+	"exclude": ["node_modules"]
 }

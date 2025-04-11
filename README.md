@@ -33,7 +33,6 @@ nullcms/
 │   ├── api/ # Core API package
 │   ├── backoffice/ # Backoffice UI components
 │   ├── shared/ # Shared utilities
-│   ├── eslint-config/ # ESLint config
 │   └── typescript-config/ # TypeScript config
 └── package.json # Root config
 ```
@@ -65,7 +64,7 @@ npm run format # Format code
 ### Technology
 - Frontend: React 19, Vite, @udecode/plate, Radix UI, TanStack Router & Query, Tailwind CSS
 - Backend: Hono.js, Zod, GraphQL, Cloudflare Workers
-- Dev Tools: TypeScript, Turborepo, ESLint, Prettier
+- Dev Tools: TypeScript, Turborepo, Biome
 
 
 ### Why nullCMS?

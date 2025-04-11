@@ -1,28 +1,28 @@
-import {createRootRoute, Outlet} from '@tanstack/react-router'
-import {TanStackRouterDevtools} from '@tanstack/react-router-devtools'
+import { CmsSidebar } from "@/components/cms-sidebar";
 import { LoginPage } from "@/components/login-page";
-import {useAuth} from "@/components/providers/auth-provider";
-import {CmsSidebar} from "@/components/cms-sidebar";
-import {SidebarProvider} from "@/components/ui/sidebar";
-import {Toaster} from "@/components/ui/sonner";
+import { useAuth } from "@/components/providers/auth-provider";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
+import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 export const RootRoute = createRootRoute({
-    component: () => {
-        const { isAuthenticated } = useAuth();
+	component: () => {
+		const { isAuthenticated } = useAuth();
 
-        if (!isAuthenticated) {
-            return <LoginPage />
-        }
+		if (!isAuthenticated) {
+			return <LoginPage />;
+		}
 
-        return (
-            <SidebarProvider>
-                <div className="h-screen w-screen flex">
-                    <CmsSidebar/>
-                    <Outlet/>
-                </div>
-                <TanStackRouterDevtools position={"bottom-right"}/>
-                <Toaster />
-            </SidebarProvider>
-        )
-    },
-})
+		return (
+			<SidebarProvider>
+				<div className="h-screen w-screen flex">
+					<CmsSidebar />
+					<Outlet />
+				</div>
+				<TanStackRouterDevtools position={"bottom-right"} />
+				<Toaster />
+			</SidebarProvider>
+		);
+	},
+});

@@ -1,26 +1,26 @@
-import { Hono } from 'hono';
-import { schema } from './schemas';
-import { CMS, cmsPlugin } from '@nullcms/api';
-import { StorageType } from '@nullcms/shared';
+import { CMS, cmsPlugin } from "@nullcms/api";
+import type { StorageType } from "@nullcms/shared";
+import { type Env, type ExecutionContext, Hono } from "hono";
+import { schema } from "./schemas";
 
 // Define CMS configuration
 const config = {
-  storage: {
-    type: 'lowstorage' as StorageType,
-    config: {
-      accessKeyId: '0281878b211e9d9ef727ac8e056538b9',
-      secretAccessKey: '10174ea470a057cb4c7a0a032ca96a6ee074da5f628980b81562eae297abce1f',
-      endpoint: 'https://7743e03fad48db9636b85c1f6ee46944.r2.cloudflarestorage.com/null-cms',
-      requestAbortTimeout: undefined,
-      bucketName: 'null-cms',
-    }
-  },
-  logger: {
-    type: 'text',
-    minLevel: 'info',
-    colorized: true
-  },
-  schema
+	storage: {
+		type: "lowstorage" as StorageType,
+		config: {
+			accessKeyId: process.env.S3_ACCESS_KEY,
+			secretAccessKey: process.env.S3_SECRET_KEY,
+			endpoint: process.env.S3_ENDPOINT,
+			requestAbortTimeout: undefined,
+			bucketName: process.env.S3_BUCKET,
+		},
+	},
+	logger: {
+		type: "text",
+		minLevel: "info",
+		colorized: true,
+	},
+	schema,
 };
 
 // Create the main app
@@ -30,11 +30,11 @@ let cmsInitialized = false;
 
 // Middleware to ensure CMS is initialized on first request
 async function ensureCMSInitialized() {
-  if (!cmsInitialized) {
-    await cms.initialize();
-    cmsInitialized = true;
-    console.log('CMS initialized');
-  }
+	if (!cmsInitialized) {
+		await cms.initialize();
+		cmsInitialized = true;
+		console.log("CMS initialized");
+	}
 }
 
 // Register CMS plugin
@@ -42,8 +42,8 @@ cmsPlugin(app, cms);
 
 // Cloudflare Workers handler
 export default {
-  async fetch(request: Request, env: any, ctx: any) {
-    await ensureCMSInitialized(); // Initialize CMS before processing requests
-    return app.fetch(request, env, ctx);
-  },
+	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		await ensureCMSInitialized(); // Initialize CMS before processing requests
+		return app.fetch(request, env, ctx);
+	},
 };

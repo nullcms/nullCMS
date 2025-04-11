@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
-import { AIChatPlugin, AIPlugin } from '@udecode/plate-ai/react';
-import { MarkdownPlugin } from '@udecode/plate-markdown';
+import { AIChatPlugin, AIPlugin } from "@udecode/plate-ai/react";
+import { MarkdownPlugin } from "@udecode/plate-markdown";
 
 // import { AIMenu } from '@/components/plate-ui/ai-menu';
 
-import { cursorOverlayPlugin } from './cursor-overlay-plugin';
+import { cursorOverlayPlugin } from "./cursor-overlay-plugin";
 
 const systemCommon = `\
 You are an advanced AI-powered note-taking assistant, designed to enhance productivity and creativity in note management.
@@ -82,35 +82,35 @@ NEVER write <Block> or <Selection>.
 {prompt} about <Selection>`;
 
 export const PROMPT_TEMPLATES = {
-  systemBlockSelecting,
-  systemDefault,
-  systemSelecting,
-  userBlockSelecting,
-  userDefault,
-  userSelecting,
+	systemBlockSelecting,
+	systemDefault,
+	systemSelecting,
+	userBlockSelecting,
+	userDefault,
+	userSelecting,
 };
 
 export const aiPlugins = [
-  cursorOverlayPlugin,
-  MarkdownPlugin.configure({ options: { indentList: true } }),
-  AIPlugin,
-  AIChatPlugin.configure({
-    options: {
-      promptTemplate: ({ isBlockSelecting, isSelecting }) => {
-        return isBlockSelecting
-          ? PROMPT_TEMPLATES.userBlockSelecting
-          : isSelecting
-            ? PROMPT_TEMPLATES.userSelecting
-            : PROMPT_TEMPLATES.userDefault;
-      },
-      systemTemplate: ({ isBlockSelecting, isSelecting }) => {
-        return isBlockSelecting
-          ? PROMPT_TEMPLATES.systemBlockSelecting
-          : isSelecting
-            ? PROMPT_TEMPLATES.systemSelecting
-            : PROMPT_TEMPLATES.systemDefault;
-      },
-    },
-    render: { afterEditable: () => <></> },
-  }),
+	cursorOverlayPlugin,
+	MarkdownPlugin.configure({ options: { indentList: true } }),
+	AIPlugin,
+	AIChatPlugin.configure({
+		options: {
+			promptTemplate: ({ isBlockSelecting, isSelecting }) => {
+				return isBlockSelecting
+					? PROMPT_TEMPLATES.userBlockSelecting
+					: isSelecting
+						? PROMPT_TEMPLATES.userSelecting
+						: PROMPT_TEMPLATES.userDefault;
+			},
+			systemTemplate: ({ isBlockSelecting, isSelecting }) => {
+				return isBlockSelecting
+					? PROMPT_TEMPLATES.systemBlockSelecting
+					: isSelecting
+						? PROMPT_TEMPLATES.systemSelecting
+						: PROMPT_TEMPLATES.systemDefault;
+			},
+		},
+		render: { afterEditable: () => <></> },
+	}),
 ] as const;

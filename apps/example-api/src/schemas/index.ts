@@ -1,15 +1,15 @@
-import { CMSSchema } from '@nullcms/shared';
-import { blogSchema } from './blog';
-import { settingsSchema } from './settings';
+import type { CMSSchema } from "@nullcms/shared";
+import { blogSchema } from "./blog";
+import { settingsSchema } from "./settings";
 
 export const schema: CMSSchema = {
-  collections: {
-    articles: blogSchema,
-  },
-  singletons: {
-    settings: settingsSchema,
-  },
+	collections: {
+		articles: blogSchema,
+	},
+	singletons: {
+		settings: settingsSchema,
+	},
 };
 
-export * from './blog';
-export * from './settings';
+export * from "./blog";
+export * from "./settings";

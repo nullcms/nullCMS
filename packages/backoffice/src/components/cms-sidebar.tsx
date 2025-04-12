@@ -57,7 +57,7 @@ export function CmsSidebar() {
 		<Sidebar collapsible="none" className="w-64 min-w-64">
 			<SidebarHeader className="flex">
 				<div className="flex gap-2 px-2">
-					<h1 className="text-lg font-bold w-full">nullCMS</h1>
+					<h1 className="text-lg font-bold w-full" data-testid="title">nullCMS</h1>
 					<Button
 						variant="ghost"
 						size="sm"

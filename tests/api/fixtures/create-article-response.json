@@ -1,0 +1,24 @@
+{
+    "status": 201,
+    "headers": {
+        "content-type": "application/json"
+    },
+    "body": {
+        "_id": "*",
+        "title": "123",
+        "excerpt": "123",
+        "content": [
+            {
+                "children": [
+                    {
+                        "text": "123"
+                    }
+                ],
+                "type": "p",
+                "id": "*"
+            }
+        ],
+        "_createdAt": "*",
+        "_updatedAt": "*"
+    }
+}

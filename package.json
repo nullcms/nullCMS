@@ -4,7 +4,8 @@
 		"build": "turbo run build",
 		"dev": "turbo run dev",
 		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write"
+		"format-and-lint:fix": "biome check . --write",
+		"test:api": "bash ./test-api.sh"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
@@ -12,5 +13,11 @@
 	},
 	"name": "@nullcms/monorepo",
 	"packageManager": "npm@10.9.0",
-	"workspaces": ["apps/*", "packages/*"]
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"dependencies": {
+		"vitest": "^3.1.1"
+	}
 }

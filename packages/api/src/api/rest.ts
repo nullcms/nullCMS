@@ -746,9 +746,7 @@ export function createRestApiRoutes(
 		async (c) => {
 			try {
 				const user = c.get("user");
-				console.log(user);
 				const document = await cms.auth.getUserById(user);
-				console.log(document);
 
 				if (!document) {
 					return c.json({ error: "User not found" }, 404);

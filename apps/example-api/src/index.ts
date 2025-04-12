@@ -1,49 +1,57 @@
 import { CMS, cmsPlugin } from "@nullcms/api";
 import type { StorageType } from "@nullcms/shared";
-import { type Env, type ExecutionContext, Hono } from "hono";
+import { type ExecutionContext, Hono } from "hono";
 import { schema } from "./schemas";
 
-// Define CMS configuration
-const config = {
-	storage: {
-		type: "lowstorage" as StorageType,
-		config: {
-			accessKeyId: process.env.S3_ACCESS_KEY,
-			secretAccessKey: process.env.S3_SECRET_KEY,
-			endpoint: process.env.S3_ENDPOINT,
-			requestAbortTimeout: undefined,
-			bucketName: process.env.S3_BUCKET,
-		},
-	},
-	logger: {
-		type: "text",
-		minLevel: "info",
-		colorized: true,
-	},
-	schema,
+// Extend Env to include your Wrangler bindings
+type CustomEnv = {
+	Bindings: {
+		DYNAMO_REGION: string;
+		DYNAMO_ENDPOINT: string;
+		DYNAMO_ACCESS_KEY_ID: string;
+		DYNAMO_SECRET_ACCESS_KEY: string;
+		DYNAMO_TABLE_PREFIX: string;
+	};
 };
 
-// Create the main app
-const app = new Hono();
-const cms = new CMS(config.storage, config.schema);
+const app = new Hono<CustomEnv>();
 let cmsInitialized = false;
+let cms: CMS;
 
 // Middleware to ensure CMS is initialized on first request
-async function ensureCMSInitialized() {
+async function ensureCMSInitialized(env: CustomEnv["Bindings"]) {
 	if (!cmsInitialized) {
+		const config = {
+			storage: {
+				type: "dynamodb" as StorageType,
+				config: {
+					region: env.DYNAMO_REGION,
+					endpoint: env.DYNAMO_ENDPOINT,
+					accessKeyId: env.DYNAMO_ACCESS_KEY_ID,
+					secretAccessKey: env.DYNAMO_SECRET_ACCESS_KEY,
+					tablePrefix: env.DYNAMO_TABLE_PREFIX,
+				},
+			},
+			logger: {
+				type: "text",
+				minLevel: "info",
+				colorized: true,
+			},
+			schema,
+		};
+
+		cms = new CMS(config.storage, config.schema);
 		await cms.initialize();
+		cmsPlugin(app, cms);
 		cmsInitialized = true;
 		console.log("CMS initialized");
 	}
 }
 
-// Register CMS plugin
-cmsPlugin(app, cms);
-
 // Cloudflare Workers handler
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		await ensureCMSInitialized(); // Initialize CMS before processing requests
+	async fetch(request: Request, env: CustomEnv["Bindings"], ctx: ExecutionContext) {
+		await ensureCMSInitialized(env);
 		return app.fetch(request, env, ctx);
 	},
 };

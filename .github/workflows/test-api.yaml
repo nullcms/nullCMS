@@ -1,0 +1,29 @@
+name: API Tests
+
+on:
+  pull_request:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Linux Dependencies
+        run: npm install @rollup/rollup-linux-arm64-gnu @esbuild/linux-arm64 @cloudflare/workerd-linux-arm64
+
+      - name: Run API tests
+        run: npm run test:api

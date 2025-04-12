@@ -46,6 +46,9 @@ export class Auth {
 	async initialize(): Promise<void> {
 		if (this.isInitialized) return;
 
+		// Ensure the storage itself is initialized
+		await this.storage.initialize();
+
 		// Ensure collections exist
 		const collections = await this.storage.listCollections();
 
@@ -67,7 +70,6 @@ export class Auth {
 	}
 
 	private async cleanupExpiredSessions(): Promise<void> {
-		// TODO: Clean this up and allow less than or greater than queries.
 		try {
 			// Delete all sessions that have expired
 			const now = new Date();
@@ -76,9 +78,9 @@ export class Auth {
 				{},
 			);
 
-			expiredSessions.filter((e) => e.expiresAt < now);
+			const toDelete = expiredSessions.filter(e => new Date(e.expiresAt) < now);
 
-			for (const session of expiredSessions) {
+			for (const session of toDelete) {
 				await this.storage.delete(this.SESSION_COLLECTION, {
 					_id: session._id,
 				});
@@ -175,24 +177,30 @@ export class Auth {
 		}
 
 		// Update last login
+		const now = new Date();
 		await this.storage.update(
 			this.USER_COLLECTION,
 			{ _id: user._id } as Partial<UserDocument>,
-			user as Partial<UserDocument>,
+			{ lastLogin: now } as Partial<UserDocument>,
 		);
 
 		// Create session token and session
 		const token = this.generateSessionToken();
-		await this.createSession(token, user._id);
-		await this.cleanupExpiredSessions();
+		try {
+			await this.createSession(token, user._id);
+			await this.cleanupExpiredSessions();
 
-		return {
-			success: true,
-			userId: user._id,
-			username: user.username,
-			role: user.role,
-			token,
-		};
+			return {
+				success: true,
+				userId: user._id,
+				username: user.username,
+				role: user.role,
+				token,
+			};
+		} catch (error) {
+			console.error("Failed to create session:", error);
+			return { success: false, reason: "Failed to create session" };
+		}
 	}
 
 	/**
@@ -222,7 +230,8 @@ export class Auth {
 
 		// Check if session has expired
 		const now = new Date();
-		if (session.expiresAt < now) {
+		const expiresAt = new Date(session.expiresAt);
+		if (expiresAt < now) {
 			// Delete expired session
 			await this.storage.delete(this.SESSION_COLLECTION, {
 				_id: sessionId,
@@ -249,7 +258,7 @@ export class Auth {
 			now.getTime() - this.SESSION_RENEWAL_THRESHOLD_DAYS * 24 * 60 * 60 * 1000,
 		);
 
-		if (session.expiresAt <= renewalThreshold) {
+		if (expiresAt <= renewalThreshold) {
 			// Extend session
 			const newExpiryDate = new Date(
 				now.getTime() + this.SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
@@ -389,12 +398,17 @@ export class Auth {
 			now.getTime() + this.SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
 		);
 
-		// Create session
-		await this.storage.insert<SessionDocument>(this.SESSION_COLLECTION, {
-			_id: sessionId,
-			userId,
-			expiresAt,
-		});
+		// Create session with explicit _id
+		try {
+			await this.storage.insert<SessionDocument>(this.SESSION_COLLECTION, {
+				_id: sessionId,
+				userId,
+				expiresAt,
+			});
+		} catch (error) {
+			console.error("Failed to insert session:", error);
+			throw error; // Re-throw to handle in the login method
+		}
 	}
 
 	/**

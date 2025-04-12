@@ -6,27 +6,12 @@
 	},
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-19",
-	"compatibility_flags": ["nodejs_compat"]
-	// "vars": {
-	//   "MY_VAR": "my-variable"
-	// },
-	// "kv_namespaces": [
-	//   {
-	//     "binding": "MY_KV_NAMESPACE",
-	//     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-	//   }
-	// ],
-	// "d1_databases": [
-	//   {
-	//     "binding": "MY_DB",
-	//     "database_name": "my-database",
-	//     "database_id": ""
-	//   }
-	// ],
-	// "ai": {
-	//   "binding": "AI"
-	// },
-	// "observability": {
-	//   "head_sampling_rate": 1
-	// }
+	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+	  "DYNAMO_REGION": "local",
+	  "DYNAMO_ENDPOINT": "http://localhost:8000",
+	  "DYNAMO_ACCESS_KEY_ID": "local",
+	  "DYNAMO_SECRET_ACCESS_KEY": "local",
+	  "DYNAMO_TABLE_PREFIX": "nullcms"
+	}
 }

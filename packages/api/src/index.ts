@@ -32,7 +32,6 @@ export function cmsPlugin(app: Hono<{ Variables: Variables }>, cms: CMS) {
 		let token = c.req.header("Authorization")?.split(" ")[1];
 		if (!token) {
 			token = getCookie(c, "auth") as string;
-			console.log(token);
 		}
 
 		if (!token) {

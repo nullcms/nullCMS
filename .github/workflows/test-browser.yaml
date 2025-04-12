@@ -1,0 +1,43 @@
+name: Browser Tests
+
+on:
+  pull_request:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  run-browser-tests:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: rm -rf node_modules package-lock.json && npm i
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Browser tests
+        run: bash ./test-browser.sh
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: tests/web/playwright-report/
+          retention-days: 30
+      
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: dev-log
+          path: dev.log
+          retention-days: 30

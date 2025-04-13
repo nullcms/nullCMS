@@ -44,6 +44,7 @@ export function LoginPage() {
 									<div className="space-y-2">
 										<Label htmlFor="username">Username</Label>
 										<Input
+										    data-testid="username"
 											id="username"
 											type="text"
 											placeholder="name@example.com"
@@ -64,6 +65,7 @@ export function LoginPage() {
 											<Label htmlFor="password">Password</Label>
 										</div>
 										<Input
+											data-testid="password"
 											id="password"
 											type="password"
 											required
@@ -78,6 +80,7 @@ export function LoginPage() {
 						</CardContent>
 						<CardFooter>
 							<Button
+								data-testid="login-button"
 								className="w-full hover:cursor-pointer"
 								size="lg"
 								type="submit"

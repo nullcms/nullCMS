@@ -26,4 +26,10 @@ jobs:
         run: npm install @rollup/rollup-linux-arm64-gnu @esbuild/linux-arm64 @cloudflare/workerd-linux-arm64
 
       - name: Run API tests
-        run: npm run test:api
+        run: bash ./test-api.sh
+      
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "test-output/junit.xml"
+        if: always()

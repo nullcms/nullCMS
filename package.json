@@ -5,7 +5,7 @@
 		"dev": "turbo run dev",
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
-		"test:api": "bash ./test-api.sh"
+		"test:playright": "turbo run test:playright"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
@@ -15,7 +15,8 @@
 	"packageManager": "npm@10.9.0",
 	"workspaces": [
 		"apps/*",
-		"packages/*"
+		"packages/*",
+		"tests/*"
 	],
 	"dependencies": {
 		"vitest": "^3.1.1"

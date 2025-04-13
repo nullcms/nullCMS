@@ -11,7 +11,7 @@ export function Navbar() {
 
 	return (
 		<>
-			<div className={cn("flex h-[52px] items-center justify-center")}>
+			<div className={cn("flex h-[52px] items-center justify-center")} data-testid="title">
 				nullCMS
 			</div>
 			<Separator />

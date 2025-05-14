@@ -72,7 +72,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { CalendarIcon } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Plate } from "@udecode/plate/react";
@@ -100,25 +100,25 @@ type ExpandValue = Record<string, unknown>;
 type FieldValue<T extends Field> = T extends { type: "string" }
 	? StringValue
 	: T extends { type: "number" }
-		? NumberValue
-		: T extends { type: "boolean" }
-			? BooleanValue
-			: T extends { type: "date" }
-				? DateValue
-				: T extends { type: "image" }
-					? ImageValue
-					: T extends { type: "file" }
-						? FileValue
-						: T extends { type: "richtext" }
-							? RichTextValue
-							: T extends { type: "expand" }
-								? ExpandValue
-								: T extends {
-											type: "array";
-											of: infer SubType;
-										}
-									? Array<FieldValue<SubType extends Field ? SubType : never>>
-									: never;
+	? NumberValue
+	: T extends { type: "boolean" }
+	? BooleanValue
+	: T extends { type: "date" }
+	? DateValue
+	: T extends { type: "image" }
+	? ImageValue
+	: T extends { type: "file" }
+	? FileValue
+	: T extends { type: "richtext" }
+	? RichTextValue
+	: T extends { type: "expand" }
+	? ExpandValue
+	: T extends {
+		type: "array";
+		of: infer SubType;
+	}
+	? Array<FieldValue<SubType extends Field ? SubType : never>>
+	: never;
 
 interface DocumentEditorProps {
 	id: string;
@@ -144,6 +144,14 @@ export function DocumentEditor({
 	const updateDocument = useUpdateDocument(collectionId);
 	const createDocument = useCreateDocument(collectionId);
 	const deleteDocument = useDeleteDocument(collectionId);
+
+	useEffect(() => {
+		if (document) {
+			setValues(document);
+		} else {
+			setValues({});
+		}
+	}, [document]);
 
 	// Identify unknown fields (fields in document but not in schema)
 	const getUnknownFields = (): string[] => {
@@ -264,13 +272,14 @@ export function DocumentEditor({
 	// Delete a field from the document
 	const deleteField = (fieldId: string): void => {
 		setValues((prev) => {
-			const newValues = { ...prev };
-			delete newValues[fieldId];
-			return newValues;
+		  const newValues = { ...prev };
+		  delete newValues[fieldId];
+		  return newValues;
 		});
-	};
+	  };
 
 	const saveDocument = async () => {
+		console.log(values)
 		if (collectionId) {
 			if (id !== "new") {
 				await updateDocument.mutateAsync({ id, data: values });
@@ -458,6 +467,7 @@ export function DocumentEditor({
 	const renderRichTextField = (
 		fieldId: string,
 		field: RichTextField,
+		contentMode?: boolean,
 	): React.ReactNode => {
 		const value = getNestedValue(fieldId) as string;
 		const editor = useCreateEditor({
@@ -467,7 +477,7 @@ export function DocumentEditor({
 
 		return (
 			<div className="grid gap-2">
-				<Label htmlFor={fieldId}>{field.label}</Label>
+				{!contentMode ?<Label htmlFor={fieldId}>{field.label}</Label> : null}
 				<DndProvider backend={HTML5Backend}>
 					<Plate
 						editor={editor}
@@ -475,7 +485,7 @@ export function DocumentEditor({
 							handleFieldChange(fieldId, value);
 						}}
 					>
-						<EditorContainer>
+						<EditorContainer variant={contentMode ? "contentMode" : "default"}>
 							<Editor />
 						</EditorContainer>
 					</Plate>
@@ -618,7 +628,7 @@ export function DocumentEditor({
 		}
 	}
 
-	const renderArrayField = <T extends Field>(
+	const renderArrayField = (
 		fieldId: string,
 		field: ArrayField,
 	): React.ReactNode => {
@@ -636,10 +646,17 @@ export function DocumentEditor({
 						type="button"
 						variant="ghost"
 						size="icon"
-						className=" h-7 w-7 opacity-40 hover:opacity-100"
+						className="h-7 w-7 opacity-40 hover:opacity-100"
 						onClick={() => {
-							// Create default value for the item type
-							const defaultValue = createDefaultValue(field.of as T);
+							// Create a default value object from the field.of record
+							const defaultValue = {};
+
+							// Process each field in the record and create default values
+							if (field.of) {
+								Object.entries(field.of).forEach(([key, fieldSchema]) => {
+									defaultValue[key] = createDefaultValue(fieldSchema);
+								});
+							}
 
 							// Get the current array (or empty array if it doesn't exist)
 							setValues((prev) => {
@@ -659,11 +676,40 @@ export function DocumentEditor({
 				</div>
 				<div className="space-y-2">
 					{Array.isArray(currentValue) &&
-						renderArrayItems(
-							fieldId,
-							field.of as T,
-							currentValue as Array<FieldValue<T>>,
-						)}
+						currentValue.map((item, index) => (
+							<div key={index} className="relative rounded-md border p-4">
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									className="absolute right-2 top-2 h-6 w-6 opacity-50 hover:opacity-100"
+									onClick={() => {
+										setValues((prev) => {
+											const newArray = [...(prev[fieldId] || [])];
+											newArray.splice(index, 1);
+											return {
+												...prev,
+												[fieldId]: newArray,
+											};
+										});
+									}}
+								>
+									<Trash2 className="h-4 w-4" />
+									<span className="sr-only">Remove item</span>
+								</Button>
+
+								<div className="space-y-3">
+									{Object.entries(field.of).map(([key, fieldSchema]) => (
+										<div key={key}>
+											{renderFieldByType(
+												`${fieldId}.${index}.${key}`,
+												fieldSchema,
+											)}
+										</div>
+									))}
+								</div>
+							</div>
+						))}
 					{field.min !== undefined && (
 						<p className="text-xs text-muted-foreground">
 							Minimum items: {field.min}
@@ -705,19 +751,18 @@ export function DocumentEditor({
 							)}
 						</div>
 						<ChevronDown
-							className={`h-5 w-5 transition-transform ${
-								isExpanded ? "rotate-180" : ""
-							}`}
+							className={`h-5 w-5 transition-transform ${isExpanded ? "rotate-180" : ""
+								}`}
 						/>
 					</div>
 				</CardHeader>
 				{isExpanded && (
 					<CardContent className="space-y-4">
-						{field.fields.map((nestedField) => (
-							<div key={nestedField.id} className="space-y-2">
+						{Object.entries(field.fields).map(([nestedFieldId, nestedField]) => (
+							<div key={nestedFieldId} className="space-y-2">
 								{renderFieldByType(
-									`${fieldId}.${nestedField.id}`,
-									nestedField.schema,
+									`${fieldId}.${nestedFieldId}`,
+									nestedField,
 								)}
 							</div>
 						))}
@@ -732,6 +777,7 @@ export function DocumentEditor({
 		fieldId: string,
 		fieldSchema: T,
 		fieldValue?: unknown,
+		contentMode?: boolean,
 	): React.ReactNode {
 		// Update the values state if a value is provided and it's not yet in state
 		if (fieldValue !== undefined && getNestedValue(fieldId) === undefined) {
@@ -748,7 +794,7 @@ export function DocumentEditor({
 			case "date":
 				return renderDateField(fieldId, fieldSchema as DateField);
 			case "richtext":
-				return renderRichTextField(fieldId, fieldSchema as RichTextField);
+				return renderRichTextField(fieldId, fieldSchema as RichTextField, contentMode);
 			case "image":
 				return renderImageField(fieldId, fieldSchema as ImageField);
 			case "file":
@@ -792,8 +838,8 @@ export function DocumentEditor({
 							onClick={() => saveDocument()}
 						>
 							{updateSingleton.isPending ||
-							updateDocument.isPending ||
-							createDocument.isPending ? (
+								updateDocument.isPending ||
+								createDocument.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								<Save className="h-4 w-4" />
@@ -847,14 +893,19 @@ export function DocumentEditor({
 				onValueChange={setActiveTab}
 				className="flex-1 overflow-hidden"
 			>
-				<TabsContent value="editor" className="h-full p-6 overflow-auto">
+				<TabsContent value="editor" className={cn("h-full overflow-auto", schema.fields.content != null ? "p-0" : "p-6")}>
 					<div className="space-y-6">
+						{schema.fields.content != null ? (
+							<div key={"content"} className="space-y-2">
+								{renderFieldByType("content", schema.fields.content, null, true)}
+							</div>
+						) : null}
 						{/* Render known schema fields */}
-						{Object.keys(schema.fields).map((field) => (
+						{!Object.keys(schema.fields).includes("content") ? Object.keys(schema.fields).map((field) => (
 							<div key={schema.fields[field].label} className="space-y-2">
 								{renderFieldByType(field, schema.fields[field])}
 							</div>
-						))}
+						)) : null}
 
 						{/* Render unknown fields section if there are any */}
 						{unknownFields.length > 0 && (

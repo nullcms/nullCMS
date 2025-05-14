@@ -18,21 +18,6 @@ export const blogSchema: CollectionSchema = {
 			type: "richtext",
 			required: true,
 			label: "Content",
-		},
-		categories: {
-			type: "array",
-			of: {
-				label: "Category",
-				type: "string",
-			},
-			label: "Categories",
-		},
-		// TODO: Add Reference Field
-		// author: {
-		//   type: 'reference',
-		//   collection: 'authors',
-		//   required: true,
-		//   label: 'Author',
-		// },
+		}
 	},
 };

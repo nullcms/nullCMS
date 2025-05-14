@@ -16,11 +16,13 @@ export const RootRoute = createRootRoute({
 
 		return (
 			<SidebarProvider>
-				<div className="h-screen w-screen flex">
-					<CmsSidebar />
-					<Outlet />
-				</div>
-				<TanStackRouterDevtools position={"bottom-right"} />
+					<div className="h-screen w-screen flex">
+						<CmsSidebar />
+						<div className="flex-1 flex flex-col">
+							<Outlet />
+						</div>
+					</div>
+					<TanStackRouterDevtools position={"bottom-right"} />
 				<Toaster />
 			</SidebarProvider>
 		);

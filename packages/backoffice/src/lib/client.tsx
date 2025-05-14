@@ -49,7 +49,7 @@ export type CollectionOptions = {
 };
 
 // API functions factory that uses the apiClient from context
-const createApi = (apiClient: AxiosInstance) => ({
+export const createApi = (apiClient: AxiosInstance) => ({
 	// Collection operations
 	collections: {
 		getAll: async () => {
@@ -320,11 +320,11 @@ export function useSingletonSchema(singleton: string) {
 }
 
 export function useSingleton<T extends Document>(singleton: string) {
-	const { apiClient, baseURL } = useApi();
+	const { apiClient } = useApi();
 	const api = createApi(apiClient);
 
 	return useQuery({
-		queryKey: ["singletons", baseURL, singleton],
+		queryKey: ["singletons", singleton],
 		queryFn: () => api.singletons.getById<T>(singleton),
 		enabled: !!singleton,
 	});

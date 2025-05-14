@@ -5,7 +5,9 @@
 		"dev": "turbo run dev",
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
-		"test:playright": "turbo run test:playright"
+		"test:playright": "turbo run test:playright",
+		"publish:packages": "turbo run publish:nightly",
+		"build:packages": "turbo run build --filter='./packages/*'"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
@@ -19,6 +21,7 @@
 		"tests/*"
 	],
 	"dependencies": {
+		"tsup": "^8.4.0",
 		"vitest": "^3.1.1"
 	}
 }

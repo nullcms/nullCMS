@@ -2,6 +2,7 @@ import { CollectionsList } from "@/components/collections-list";
 import { useConfig } from "@/components/providers/config-provider";
 import { RootRoute } from "@/routes/__root";
 import { createRoute } from "@tanstack/react-router";
+import {Header} from "@/components/header";
 
 export const CollectionRoute = createRoute({
 	getParentRoute: () => RootRoute,
@@ -22,6 +23,7 @@ function PostComponent() {
 
 	return (
 		<>
+			<Header title={`${schema.collections[name].title}s`} isEditable={false} />
 			<CollectionsList collectionId={name} />
 		</>
 	);

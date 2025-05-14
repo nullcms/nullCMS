@@ -1,15 +1,14 @@
 import path, { resolve } from "node:path";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import * as fs from "node:fs/promises";
 
 export default defineConfig(({ command }) => {
 	if (command === "serve") {
 		// Testbed mode
 		return {
 			plugins: [
-				TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
 				react(),
 			],
 			resolve: {
@@ -26,7 +25,7 @@ export default defineConfig(({ command }) => {
 	return {
 		plugins: [
 			react(),
-			TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
+			copyPlugin(),
 			dts({ include: ["src"] }), // Generate TypeScript definitions
 		],
 		resolve: {
@@ -40,6 +39,7 @@ export default defineConfig(({ command }) => {
 				name: "EmbeddableBackoffice",
 				fileName: "index",
 			},
+			outDir: "dist-temp",
 			rollupOptions: {
 				external: ["react", "react-dom", "@tanstack/react-router"],
 				output: {
@@ -50,6 +50,25 @@ export default defineConfig(({ command }) => {
 					},
 				},
 			},
+			watch: {
+				include: ["src/**"],
+				exclude: ["node_modules/**", "dist/**", "dist-temp/**"],
+			},
 		},
 	};
 });
+
+
+const copyPlugin = () => {
+	return {
+		name: 'copy-dist',
+		apply: 'build',
+		writeBundle() {
+			const srcPath = path.resolve(__dirname, "dist-temp")
+			const destPath = path.resolve(__dirname, "dist");
+			fs.cp(srcPath, destPath, { recursive: true })
+				.then(() => console.log(`Copied build-dir to ${destPath}`))
+				.catch(err => console.error(`Failed to copy build-dir: ${err}`));
+		}
+	};
+};

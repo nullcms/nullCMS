@@ -1,31 +1,39 @@
 {
-	"name": "@nullcms/api",
-	"version": "0.0.0",
-	"exports": {
-		".": "./src/index.ts"
-	},
-	"license": "MIT",
-	"scripts": {},
-	"dependencies": {
-		"@aws-sdk/client-dynamodb": "^3.788.0",
-		"@aws-sdk/lib-dynamodb": "^3.788.0",
-		"@hono/zod-openapi": "^0.19.2",
-		"@hono/zod-validator": "^0.4.3",
-		"@oslojs/crypto": "^1.0.1",
-		"@oslojs/encoding": "^1.1.0",
-		"axios": "^1.8.4",
-		"graphql": "^16.10.0",
-		"graphql-http": "^1.22.4",
-		"hono": "^4.7.4",
-		"ky": "^1.7.5",
-		"lowstorage": "^2.0.1",
-		"uuid": "^11.1.0",
-		"zod": "^3.24.2"
-	},
-	"devDependencies": {
-		"@nullcms/shared": "*",
-		"@nullcms/typescript-config": "*",
-		"@types/node": "^22.13.10",
-		"typescript": "5.5.4"
-	}
+  "name": "@nullcms/api",
+  "version": "0.0.1-nightly.20250425051817",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "publish:nightly": "node -e \"const pkg = require('./package.json'); const version = pkg.version.split('-')[0] + '-nightly.' + new Date().toISOString().replace(/[:.T-]/g, '').substring(0,14); require('fs').writeFileSync('package.json', JSON.stringify({...pkg, version}, null, 2)); console.log('Version updated to ' + version)\" && npm publish --tag nightly"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.788.0",
+    "@aws-sdk/lib-dynamodb": "^3.788.0",
+    "@hono/zod-openapi": "^0.19.2",
+    "@hono/zod-validator": "^0.4.3",
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
+    "axios": "^1.8.4",
+    "better-sqlite3": "^11.9.1",
+    "graphql": "^16.10.0",
+    "graphql-http": "^1.22.4",
+    "hono": "^4.7.4",
+    "ky": "^1.7.5",
+    "kysely": "^0.28.2",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@nullcms/shared": "*",
+    "@nullcms/typescript-config": "*",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.13.10",
+    "typescript": "5.5.4"
+  }
 }

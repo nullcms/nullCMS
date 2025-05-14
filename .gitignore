@@ -12,3 +12,4 @@ public/dist
 
 .wrangler
 test-output
+**/dist-temp

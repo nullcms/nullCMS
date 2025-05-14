@@ -4,9 +4,9 @@ import { DocumentEditor } from "@/components/document-editor";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useSingleton } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import type { SingletonSchema } from "@nullcms/shared";
+import type { Document } from "@nullcms/shared";
 import {
 	Copy,
 	FileDown,
@@ -22,13 +22,12 @@ import { toast } from "sonner";
 interface FieldEditorProps {
 	schema: SingletonSchema;
 	id: string;
+	singleton: Document;
 }
 
-export function FieldEditor({ schema, id }: FieldEditorProps) {
+export function FieldEditor({ schema, id, singleton }: FieldEditorProps) {
 	const [showIdeas, setShowIdeas] = useState(false);
 	const [commandMenuOpen, setCommandMenuOpen] = useState(false);
-
-	const singleton = useSingleton(id);
 
 	// Command+K handler
 	const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -126,9 +125,7 @@ export function FieldEditor({ schema, id }: FieldEditorProps) {
 
 	return (
 		<div className="flex h-full flex-col w-full flex-1">
-			{singleton.isLoading ? null : (
-				<DocumentEditor document={singleton.data} schema={schema} id={id} />
-			)}
+			<DocumentEditor document={singleton} schema={schema} id={id} />
 
 			{/* Command Menu Dialog */}
 			<Dialog open={commandMenuOpen} onOpenChange={setCommandMenuOpen}>

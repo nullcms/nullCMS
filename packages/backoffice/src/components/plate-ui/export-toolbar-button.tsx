@@ -27,7 +27,6 @@ import {
 	BaseCodeLinePlugin,
 	BaseCodeSyntaxPlugin,
 } from "@udecode/plate-code-block";
-import { BaseCommentsPlugin } from "@udecode/plate-comments";
 import { BaseDatePlugin } from "@udecode/plate-date";
 import {
 	BaseFontBackgroundColorPlugin,
@@ -60,7 +59,6 @@ import {
 	BaseMediaEmbedPlugin,
 	BaseVideoPlugin,
 } from "@udecode/plate-media";
-import { BaseMentionPlugin } from "@udecode/plate-mention";
 import {
 	BaseTableCellHeaderPlugin,
 	BaseTableCellPlugin,
@@ -79,7 +77,6 @@ import { CodeLineElementStatic } from "@/components/plate-ui/code-line-element-s
 import { CodeSyntaxLeafStatic } from "@/components/plate-ui/code-syntax-leaf-static";
 import { ColumnElementStatic } from "@/components/plate-ui/column-element-static";
 import { ColumnGroupElementStatic } from "@/components/plate-ui/column-group-element-static";
-import { CommentLeafStatic } from "@/components/plate-ui/comment-leaf-static";
 // import { DateElementStatic } from '@/components/plate-ui/date-element-static';
 import { HeadingElementStatic } from "@/components/plate-ui/heading-element-static";
 import { HighlightLeafStatic } from "@/components/plate-ui/highlight-leaf-static";
@@ -98,7 +95,6 @@ import { LinkElementStatic } from "@/components/plate-ui/link-element-static";
 import { MediaAudioElementStatic } from "@/components/plate-ui/media-audio-element-static";
 import { MediaFileElementStatic } from "@/components/plate-ui/media-file-element-static";
 import { MediaVideoElementStatic } from "@/components/plate-ui/media-video-element-static";
-import { MentionElementStatic } from "@/components/plate-ui/mention-element-static";
 import { ParagraphElementStatic } from "@/components/plate-ui/paragraph-element-static";
 import {
 	TableCellElementStatic,
@@ -196,7 +192,6 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
 			[BaseCodeSyntaxPlugin.key]: CodeSyntaxLeafStatic,
 			[BaseColumnItemPlugin.key]: ColumnElementStatic,
 			[BaseColumnPlugin.key]: ColumnGroupElementStatic,
-			[BaseCommentsPlugin.key]: CommentLeafStatic,
 			// [BaseDatePlugin.key]: DateElementStatic,
 			[BaseEquationPlugin.key]: EquationElementStatic,
 			[BaseFilePlugin.key]: MediaFileElementStatic,
@@ -208,7 +203,6 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
 			[BaseKbdPlugin.key]: KbdLeafStatic,
 			[BaseLinkPlugin.key]: LinkElementStatic,
 			// [BaseMediaEmbedPlugin.key]: MediaEmbedElementStatic,
-			[BaseMentionPlugin.key]: MentionElementStatic,
 			[BaseParagraphPlugin.key]: ParagraphElementStatic,
 			[BaseStrikethroughPlugin.key]: withProps(SlateLeaf, { as: "del" }),
 			[BaseSubscriptPlugin.key]: withProps(SlateLeaf, { as: "sub" }),
@@ -312,8 +306,6 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
 				BaseHighlightPlugin,
 				BaseFilePlugin,
 				BaseImagePlugin,
-				BaseMentionPlugin,
-				BaseCommentsPlugin,
 				BaseTogglePlugin,
 			],
 			value: editor.children,

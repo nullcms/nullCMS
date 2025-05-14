@@ -7,6 +7,7 @@ import type {
 import { type StorageConfig, createStorageStrategy } from "../storage/factory";
 import type { StorageStrategy } from "../storage/strategy";
 import { Auth } from "./auth";
+import type { DocumentQueryArgs } from "../api/graphql";
 
 export class CMS {
 	private storage: StorageStrategy;
@@ -75,7 +76,7 @@ export class CMS {
 
 	async getCollectionDocuments<T extends Document>(
 		name: string,
-		options: { skip?: number; limit?: number } = {},
+		options: DocumentQueryArgs,
 	): Promise<T[]> {
 		this.ensureInitialized();
 
@@ -132,7 +133,7 @@ export class CMS {
 		await this.storage.update<T>(
 			collection,
 			{ _id: id } as Partial<T>,
-			data as Partial<T>,
+			data as T,
 		);
 		return await this.storage.findOne<T>(collection, { _id: id } as Partial<T>);
 	}

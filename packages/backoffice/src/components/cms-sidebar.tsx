@@ -1,17 +1,10 @@
 "use client";
-import { useAuth } from "@/components/providers/auth-provider";
+
 import { useConfig } from "@/components/providers/config-provider";
 import { Button } from "@/components/ui/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
@@ -24,136 +17,138 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
-import {
-	ChevronDown,
-	ChevronLeft,
-	ChevronRight,
-	FileText,
-	FolderOpen,
-	Plus,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, FolderOpen, Plus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react"; // <-- add this
 
 export function CmsSidebar() {
-	const { state, toggleSidebar } = useSidebar();
+	const { open, toggleSidebar, setOpen } = useSidebar();
 	const { schema } = useConfig();
-	const { logout } = useAuth();
+	const [isMobile, setIsMobile] = useState(false);
 
-	const isCollapsed = state === "collapsed";
+	// Auto-collapse on mobile
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 768); // <768px is mobile
+		};
 
-	if (isCollapsed) {
-		return (
-			<Button
-				variant="outline"
-				size="sm"
-				onClick={toggleSidebar}
-				className="h-7 w-7 p-0 fixed bottom-2 left-2"
-			>
-				<ChevronRight className="h-4 w-4" />
-			</Button>
-		);
-	}
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	}, []);
+
+	console.log(open, isMobile);
+
+	useEffect(() => {
+		if (isMobile) {
+			setOpen(false);
+		}
+		else {
+			setOpen(true);
+		}
+	}, [isMobile]);
 
 	return (
-		<Sidebar collapsible="none" className="w-64 min-w-64">
-			<SidebarHeader className="flex">
-				<div className="flex gap-2 px-2">
-					<h1 className="text-lg font-bold w-full" data-testid="title">nullCMS</h1>
+		<AnimatePresence initial={false}>
+			{!open ? (
+				<motion.div
+					key="collapsed"
+					initial={{ opacity: 0, x: -20 }}
+					animate={{ opacity: 1, x: 0 }}
+					exit={{ opacity: 0, x: -20 }}
+					transition={{ duration: 0.2 }}
+					className="fixed bottom-2 left-2 z-50"
+				>
 					<Button
-						variant="ghost"
+						variant="outline"
 						size="sm"
 						onClick={toggleSidebar}
 						className="h-7 w-7 p-0"
 					>
-						<ChevronLeft className="h-4 w-4" />
+						<ChevronRight className="h-4 w-4" />
 					</Button>
-				</div>
-			</SidebarHeader>
-			<SidebarContent>
-				{schema.collections ? (
-					<SidebarGroup>
-						<SidebarGroupLabel>Collections</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{Object.keys(schema.collections).map((e) => (
-									<SidebarMenuItem key={crypto.randomUUID()}>
-										<SidebarMenuButton asChild>
-											<Link
-												className="[&.active]:bg-muted"
-												to="/collection/$slug"
-												params={{ slug: e }}
-												activeOptions={{ exact: true }}
-											>
-												<FolderOpen className="h-4 w-4" />
-												{schema.collections ? (
-													<span>{schema.collections[e]?.title}</span>
-												) : null}
-											</Link>
-										</SidebarMenuButton>
-										<SidebarMenuAction>
-											<Plus className="h-4 w-4" />
-										</SidebarMenuAction>
-									</SidebarMenuItem>
-								))}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				) : null}
-				{schema.singletons ? (
-					<SidebarGroup>
-						<SidebarGroupLabel>Singletons</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{Object.keys(schema.singletons).map((e) => (
-									<SidebarMenuItem key={e}>
-										<SidebarMenuButton asChild>
-											<Link
-												className="[&.active]:bg-muted"
-												to="/singleton/$slug"
-												params={{ slug: e }}
-											>
-												<FileText className="h-4 w-4" />
-												{schema.singletons ? (
-													<span>{schema.singletons[e].title}</span>
-												) : null}
-											</Link>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								))}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				) : null}
-			</SidebarContent>
-
-			<SidebarFooter>
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<SidebarMenuButton
-									tooltip="User Profile"
-									className="hover:cursor-pointer"
+				</motion.div>
+			) : (
+				<motion.div
+					key="expanded"
+					initial={{ width: 0, opacity: 0 }}
+					animate={{ width: "fit-content", opacity: 1 }}
+					exit={{ width: 0, opacity: 0 }}
+					transition={{ type: "spring", stiffness: 300, damping: 30 }}
+					className={`${isMobile ? "fixed inset-0 bg-background z-40" : ""}`}
+				>
+					<Sidebar collapsible="none" className="w-64 min-w-64 h-full">
+						<SidebarHeader className="flex">
+							<div className="flex gap-2 px-2 my-auto w-full">
+								<h1 className="text-xl font-bold tracking-tighter font-mono" data-testid="title">
+									nullCMS
+								</h1>
+								<Button
+									variant="ghost"
+									size="lg"
+									onClick={toggleSidebar}
+									className="h-7 w-7 p-0 ml-auto"
 								>
-									<span>User</span>
-									<ChevronDown className="ml-auto h-4 w-4" />
-								</SidebarMenuButton>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								align="start"
-								className="w-[--radix-popper-anchor-width]"
-							>
-								<DropdownMenuItem
-									className="hover:cursor-pointer"
-									onClick={() => logout()}
-								>
-									<span>Log out</span>
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarFooter>
-			<SidebarRail />
-		</Sidebar>
+									<ChevronLeft className="h-4 w-4" />
+								</Button>
+							</div>
+						</SidebarHeader>
+						<SidebarContent>
+							{schema.collections && (
+								<SidebarGroup>
+									<SidebarGroupLabel>Collections</SidebarGroupLabel>
+									<SidebarGroupContent>
+										<SidebarMenu>
+											{Object.keys(schema.collections).map((e) => (
+												<SidebarMenuItem key={crypto.randomUUID()}>
+													<SidebarMenuButton asChild>
+														<Link
+															className="[&.active]:bg-muted"
+															to="/collection/$slug"
+															params={{ slug: e }}
+															activeOptions={{ exact: true }}
+														>
+															<FolderOpen className="h-4 w-4" />
+															<span>{schema.collections?.[e]?.title}</span>
+														</Link>
+													</SidebarMenuButton>
+													<SidebarMenuAction>
+														<Plus className="h-4 w-4" />
+													</SidebarMenuAction>
+												</SidebarMenuItem>
+											))}
+										</SidebarMenu>
+									</SidebarGroupContent>
+								</SidebarGroup>
+							)}
+							{schema.singletons && (
+								<SidebarGroup>
+									<SidebarGroupLabel>Singletons</SidebarGroupLabel>
+									<SidebarGroupContent>
+										<SidebarMenu>
+											{Object.keys(schema.singletons).map((e) => (
+												<SidebarMenuItem key={e}>
+													<SidebarMenuButton asChild>
+														<Link
+															className="[&.active]:bg-muted"
+															to="/singleton/$slug"
+															params={{ slug: e }}
+														>
+															<FileText className="h-4 w-4" />
+															<span>{schema.singletons?.[e]?.title}</span>
+														</Link>
+													</SidebarMenuButton>
+												</SidebarMenuItem>
+											))}
+										</SidebarMenu>
+									</SidebarGroupContent>
+								</SidebarGroup>
+							)}
+						</SidebarContent>
+						<SidebarRail />
+					</Sidebar>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 }

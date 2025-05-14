@@ -1,4 +1,5 @@
 import type { Document } from "@nullcms/shared";
+import { DocumentQueryArgs } from "../api/graphql";
 
 export interface StorageStrategy {
 	// Collection operations
@@ -16,7 +17,7 @@ export interface StorageStrategy {
 	find<T extends Document>(
 		collection: string,
 		query: Partial<T>,
-		options?: { skip?: number; limit?: number },
+		options?: DocumentQueryArgs,
 	): Promise<T[]>;
 	findOne<T extends Document>(
 		collection: string,
@@ -25,7 +26,12 @@ export interface StorageStrategy {
 	update<T extends Document>(
 		collection: string,
 		query: Partial<T>,
-		update: Partial<T>,
+		document: Omit<T, "_id" | "_createdAt" | "_updatedAt">,
+	): Promise<number>;
+	updatePartial<T extends Document>(
+		collection: string,
+		query: Partial<T>,
+		partial: Partial<T>,
 	): Promise<number>;
 	delete<T extends Document>(
 		collection: string,

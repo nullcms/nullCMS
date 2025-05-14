@@ -1,1 +1,1 @@
-export type StorageType = "lowstorage" | "dynamodb";
+export type StorageType = "sqlite" | "dynamodb";

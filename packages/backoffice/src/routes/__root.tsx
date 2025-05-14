@@ -18,7 +18,9 @@ export const RootRoute = createRootRoute({
 			<SidebarProvider>
 				<div className="h-screen w-screen flex">
 					<CmsSidebar />
-					<Outlet />
+					<div className="flex-1 flex flex-col">
+						<Outlet />
+					</div>
 				</div>
 				<TanStackRouterDevtools position={"bottom-right"} />
 				<Toaster />

@@ -7,7 +7,7 @@ import "@nullcms/backoffice/dist/index.css";
 const config: BackofficeConfig = {
 	title: "Test Backoffice",
 	basePath: "",
-	apiUrl: "https://api.demo.nullcms.com",
+	apiUrl: "http://localhost:3000",
 	theme: {
 		primaryColor: "#3b82f6",
 		darkMode: false,

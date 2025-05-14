@@ -178,7 +178,7 @@ export class Auth {
 
 		// Update last login
 		const now = new Date();
-		await this.storage.update(
+		await this.storage.updatePartial(
 			this.USER_COLLECTION,
 			{ _id: user._id } as Partial<UserDocument>,
 			{ lastLogin: now } as Partial<UserDocument>,

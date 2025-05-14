@@ -13,14 +13,6 @@ export const settingsSchema: SingletonSchema = {
 		siteDescription: {
 			type: "string",
 			label: "Site Description",
-		},
-		socialLinks: {
-			type: "array",
-			of: {
-				type: "number",
-				label: "Social Links",
-			},
-			label: "Social Media Links",
-		},
+		}
 	},
 };

@@ -7,6 +7,7 @@ import type {
 } from "@nullcms/shared";
 import {
 	GraphQLBoolean,
+	GraphQLEnumType,
 	type GraphQLFieldConfigMap,
 	GraphQLFloat,
 	type GraphQLInputFieldConfigMap,
@@ -111,9 +112,18 @@ interface CollectionInputTypes {
 }
 
 // Strong typing for resolver arguments
-interface DocumentQueryArgs {
-	skip: number;
-	limit: number;
+export interface DocumentQueryArgs {
+	skip?: number;
+	limit?: number;
+	orderBy?: Array<{
+		field: string;
+		direction: 'asc' | 'desc';
+	}>;
+	where?: Array<{
+		field: string;
+		operator: 'EQ' | 'NEQ' | 'GT' | 'GTE' | 'LT' | 'LTE' | 'IN' | 'NIN';
+		value: string | number | boolean | null;
+	}>;
 }
 
 interface DocumentByIdArgs {
@@ -182,13 +192,54 @@ export class GraphQLBuilder {
 			case "image":
 				type = GraphQLImage;
 				break;
+			case "expand": {
+				// Create a nested object type for the expanded fields
+				const expandFieldsTypeName = `${typeName}Fields`;
+				const expandFields: GraphQLFieldConfigMap<Document, GraphQLContext> = {};
+
+				if (field.fields) {
+					for (const [fieldName, fieldSchema] of Object.entries(field.fields)) {
+						expandFields[fieldName] = {
+							type: this.mapFieldTypeToGraphQLOutput(
+								fieldSchema as FieldSchemaType,
+								`${expandFieldsTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`
+							),
+							description: fieldSchema.label || fieldName,
+						};
+					}
+				}
+
+				const expandType = new GraphQLObjectType({
+					name: expandFieldsTypeName,
+					fields: expandFields,
+				});
+
+				type = expandType;
+				break;
+			}
 			case "array":
 				if (field.of) {
-					const innerType = this.mapFieldTypeToGraphQLOutput(
-						field.of,
-						`${typeName}Item`,
-					);
-					type = new GraphQLList(innerType);
+					// Create a GraphQL object type for the array items if they're records
+					const itemTypeName = `${typeName}Item`;
+					const itemFields: GraphQLFieldConfigMap<Document, GraphQLContext> = {};
+
+					// Process each field in the record
+					for (const [fieldName, fieldSchema] of Object.entries(field.of)) {
+						itemFields[fieldName] = {
+							type: this.mapFieldTypeToGraphQLOutput(
+								fieldSchema as FieldSchemaType,
+								`${itemTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`
+							),
+							description: fieldSchema.label || fieldName,
+						};
+					}
+
+					const itemType = new GraphQLObjectType({
+						name: itemTypeName,
+						fields: itemFields,
+					});
+
+					type = new GraphQLList(itemType);
 				} else {
 					type = new GraphQLList(GraphQLString); // Default to string array if not specified
 				}
@@ -264,15 +315,55 @@ export class GraphQLBuilder {
 				break;
 			case "array":
 				if (field.of) {
-					const innerType = this.mapFieldTypeToGraphQLInput(
-						field.of,
-						`${typeName}Item`,
-					);
-					type = new GraphQLList(innerType);
+					// Create a GraphQL input object type for the array items if they're records
+					const itemInputTypeName = `${typeName}ItemInput`;
+					const itemInputFields: GraphQLInputFieldConfigMap = {};
+
+					// Process each field in the record
+					for (const [fieldName, fieldSchema] of Object.entries(field.of)) {
+						itemInputFields[fieldName] = {
+							type: this.mapFieldTypeToGraphQLInput(
+								fieldSchema as FieldSchemaType,
+								`${itemInputTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`
+							),
+							description: fieldSchema.label || fieldName,
+						};
+					}
+
+					const itemInputType = new GraphQLInputObjectType({
+						name: itemInputTypeName,
+						fields: itemInputFields,
+					});
+
+					type = new GraphQLList(itemInputType);
 				} else {
 					type = new GraphQLList(GraphQLString); // Default to string array if not specified
 				}
 				break;
+			case "expand": {
+				const expandInputTypeName = `${typeName}Input`;
+				const expandInputFields: GraphQLInputFieldConfigMap = {};
+
+				if (field.fields) {
+					for (const [fieldName, fieldSchema] of Object.entries(field.fields)) {
+						expandInputFields[fieldName] = {
+							type: this.mapFieldTypeToGraphQLInput(
+								fieldSchema as FieldSchemaType,
+								`${expandInputTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`
+							),
+							description: fieldSchema.label || fieldName,
+						};
+					}
+				}
+
+				const expandInputType = new GraphQLInputObjectType({
+					name: expandInputTypeName,
+					fields: expandInputFields,
+				});
+
+				type = expandInputType;
+				break;
+			}
 			// case "reference":
 			// 	// References in input types are just IDs
 			// 	type = GraphQLString;
@@ -440,15 +531,15 @@ export class GraphQLBuilder {
 				createInputFields[fieldName] = {
 					type: typedFieldSchema.required
 						? this.ensureNonNullType(
-								this.mapFieldTypeToGraphQLInput(
-									typedFieldSchema,
-									`${createTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`,
-								),
-							)
-						: this.mapFieldTypeToGraphQLInput(
+							this.mapFieldTypeToGraphQLInput(
 								typedFieldSchema,
 								`${createTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`,
 							),
+						)
+						: this.mapFieldTypeToGraphQLInput(
+							typedFieldSchema,
+							`${createTypeName}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`,
+						),
 					description: typedFieldSchema.label || fieldName,
 				};
 			}
@@ -548,6 +639,125 @@ export class GraphQLBuilder {
 		return updateInputType;
 	}
 
+	private createOrderFieldEnum(
+		name: string,
+		schema: CollectionSchema
+	): GraphQLEnumType {
+		const typeName = `${name}OrderField`;
+
+		// Define enum values based on the schema fields
+		const enumValues: any = {};
+
+		// Add system fields
+		enumValues._id = { value: '_id' };
+		if (schema.timestamps) {
+			enumValues._createdAt = { value: '_createdAt' };
+			enumValues._updatedAt = { value: '_updatedAt' };
+		}
+
+		// Add all schema fields
+		if (schema.fields) {
+			for (const fieldName of Object.keys(schema.fields)) {
+				enumValues[fieldName] = { value: fieldName };
+			}
+		}
+
+		return new GraphQLEnumType({
+			name: typeName,
+			values: enumValues
+		});
+	}
+
+	private createWhereFieldEnum(
+		name: string,
+		schema: CollectionSchema
+	): GraphQLEnumType {
+		const typeName = `${name}WhereField`;
+
+		// Define enum values based on the schema fields
+		const enumValues: any = {};
+
+		// Add system fields
+		enumValues._id = { value: '_id' };
+		if (schema.timestamps) {
+			enumValues._createdAt = { value: '_createdAt' };
+			enumValues._updatedAt = { value: '_updatedAt' };
+		}
+
+		// Add all schema fields
+		if (schema.fields) {
+			for (const fieldName of Object.keys(schema.fields)) {
+				enumValues[fieldName] = { value: fieldName };
+			}
+		}
+
+		return new GraphQLEnumType({
+			name: typeName,
+			values: enumValues
+		});
+	}
+
+	private createSortDirectionEnum(): GraphQLEnumType {
+		return new GraphQLEnumType({
+			name: 'SortDirection',
+			values: {
+				ASC: { value: 'asc' },
+				DESC: { value: 'desc' }
+			}
+		});
+	}
+
+	private createFilterOperatorEnum(): GraphQLEnumType {
+		return new GraphQLEnumType({
+		  name: "FilterOperator",
+		  values: {
+			EQ:  { value: 'EQ' },
+			NEQ: { value: 'NEQ' },
+			GT:  { value: 'GT' },
+			GTE: { value: 'GTE' },
+			LT:  { value: 'LT' },
+			LTE: { value: 'LTE' },
+			IN:  { value: 'IN' },
+			NIN: { value: 'NIN' },
+		  },
+		});
+	  }
+	  
+	  private createWhereInputType(
+		collectionName: string,
+		schema: CollectionSchema
+	  ): GraphQLInputObjectType {
+		const opEnum = this.createFilterOperatorEnum();
+		const fieldEnum = this.createWhereFieldEnum(collectionName, schema);
+	  
+		return new GraphQLInputObjectType({
+		  name: `${collectionName}WhereInput`,
+		  fields: {
+			field:     { type: new GraphQLNonNull(fieldEnum) },
+			operator:  { type: new GraphQLNonNull(opEnum) },
+			// value: GraphQLString/Float/Boolean/Date… — for simplicity use scalar JSON String
+			value:     { type: GraphQLString },
+		  },
+		});
+	  }
+
+	  private createOrderInputType(
+		collectionName: string,
+		schema: CollectionSchema
+	  ): GraphQLInputObjectType {
+		const sortDirectionEnum = this.createSortDirectionEnum();
+		const fieldEnum = this.createOrderFieldEnum(collectionName, schema);
+	  
+		return new GraphQLInputObjectType({
+		  name: `${collectionName}OrderInput`,
+		  fields: {
+			field: { type: new GraphQLNonNull(fieldEnum) },
+			direction: { type: new GraphQLNonNull(sortDirectionEnum) }
+		  },
+		});
+	  }
+
+
 	/**
 	 * Builds a complete GraphQL schema for the CMS
 	 */
@@ -562,6 +772,8 @@ export class GraphQLBuilder {
 
 		// Add collection queries
 		if (this.schema.collections) {
+			const sortDirectionEnum = this.createSortDirectionEnum();
+
 			for (const [collectionName, collectionSchema] of Object.entries(
 				this.schema.collections,
 			)) {
@@ -570,12 +782,17 @@ export class GraphQLBuilder {
 					collectionSchema,
 				);
 
+				const whereInput = this.createWhereInputType(collectionName, collectionSchema);
+				const orderInput = this.createOrderInputType(collectionName, collectionSchema);
+
 				// Get all documents
 				queryFields[collectionName] = {
 					type: new GraphQLList(collectionType),
 					args: {
 						skip: { type: GraphQLInt },
 						limit: { type: GraphQLInt },
+						orderBy: { type: new GraphQLList(orderInput) },
+    					where:   { type: new GraphQLList(whereInput) },
 					},
 					resolve: async (
 						_: unknown,
@@ -585,6 +802,8 @@ export class GraphQLBuilder {
 						return await context.cms.getCollectionDocuments(collectionName, {
 							skip: args.skip || 0,
 							limit: args.limit || 50,
+							orderBy: args.orderBy,
+							where:   args.where,
 						});
 					},
 				};

@@ -50,6 +50,10 @@ export default defineConfig(({ command }) => {
 					},
 				},
 			},
+			watch: {
+				include: ["src/**"],
+				exclude: ["node_modules/**", "dist/**"],
+			},
 		},
 	};
 });

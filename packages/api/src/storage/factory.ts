@@ -1,7 +1,7 @@
 import type { StorageType } from "@nullcms/shared";
-import { type LowStorageConfig, LowStorageStrategy } from "./lowstorage";
 import type { StorageStrategy } from "./strategy";
-import { type DynamoDBStorageConfig, DynamoDBStorageStrategy } from "./dynamodb";
+// import { type DynamoDBStorageConfig, DynamoDBStorageStrategy } from "./dynamodb";
+import { type SQLiteStorageConfig, SQLiteStorageStrategy } from "./sqlite";
 
 export interface StorageConfig {
 	type: StorageType;
@@ -10,10 +10,10 @@ export interface StorageConfig {
 
 export function createStorageStrategy(config: StorageConfig): StorageStrategy {
 	switch (config.type) {
-		case "lowstorage":
-			return new LowStorageStrategy(config.config as LowStorageConfig);
-		case "dynamodb":
-			return new DynamoDBStorageStrategy(config.config as DynamoDBStorageConfig);
+		case "sqlite":
+			return new SQLiteStorageStrategy(config.config as SQLiteStorageConfig);
+		// case "dynamodb":
+		// 	return new DynamoDBStorageStrategy(config.config as DynamoDBStorageConfig);
 		default:
 			throw new Error(`Unsupported storage type: ${config.type}`);
 	}

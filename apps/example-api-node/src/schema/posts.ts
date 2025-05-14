@@ -19,12 +19,5 @@ export const blogSchema: CollectionSchema = {
 			required: true,
 			label: "Content",
 		}
-		// TODO: Add Reference Field
-		// author: {
-		//   type: 'reference',
-		//   collection: 'authors',
-		//   required: true,
-		//   label: 'Author',
-		// },
 	},
 };

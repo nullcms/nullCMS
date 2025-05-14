@@ -51,7 +51,7 @@ export function CollectionsList({ collectionId }: CollectionsPageProps) {
 				</p>
 			</header>
 
-			<div className="flex-1 p-6 overflow-auto">
+			<div className="flex-1 overflow-auto p-6">
 				<div className="rounded-md border">
 					<Table>
 						<TableHeader>

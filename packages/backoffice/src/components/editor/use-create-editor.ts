@@ -74,7 +74,6 @@ import { CodeLineElement } from "@/components/plate-ui/code-line-element";
 import { CodeSyntaxLeaf } from "@/components/plate-ui/code-syntax-leaf";
 import { ColumnElement } from "@/components/plate-ui/column-element";
 import { ColumnGroupElement } from "@/components/plate-ui/column-group-element";
-import { CommentLeaf } from "@/components/plate-ui/comment-leaf";
 // import { DateElement } from '@/components/plate-ui/date-element';
 import { EmojiInputElement } from "@/components/plate-ui/emoji-input-element";
 import { EquationElement } from "@/components/plate-ui/equation-element";
@@ -90,12 +89,9 @@ import { MediaEmbedElement } from "@/components/plate-ui/media-embed-element";
 import { MediaFileElement } from "@/components/plate-ui/media-file-element";
 // import { MediaPlaceholderElement } from "@/components/plate-ui/media-placeholder-element";
 import { MediaVideoElement } from "@/components/plate-ui/media-video-element";
-import { MentionElement } from "@/components/plate-ui/mention-element";
-import { MentionInputElement } from "@/components/plate-ui/mention-input-element";
 import { ParagraphElement } from "@/components/plate-ui/paragraph-element";
 import { withPlaceholders } from "@/components/plate-ui/placeholder";
 import { SlashInputElement } from "@/components/plate-ui/slash-input-element";
-import { SuggestionLeaf } from "@/components/plate-ui/suggestion-leaf";
 import {
 	TableCellElement,
 	TableCellHeaderElement,
@@ -115,7 +111,6 @@ export const viewComponents = {
 	[CodeSyntaxPlugin.key]: CodeSyntaxLeaf,
 	[ColumnItemPlugin.key]: ColumnElement,
 	[ColumnPlugin.key]: ColumnGroupElement,
-	[CommentsPlugin.key]: CommentLeaf,
 	// [DatePlugin.key]: DateElement,
 	[EquationPlugin.key]: EquationElement,
 	[FilePlugin.key]: MediaFileElement,
@@ -133,12 +128,10 @@ export const viewComponents = {
 	[KbdPlugin.key]: KbdLeaf,
 	[LinkPlugin.key]: LinkElement,
 	[MediaEmbedPlugin.key]: MediaEmbedElement,
-	[MentionPlugin.key]: MentionElement,
 	[ParagraphPlugin.key]: ParagraphElement,
 	// [PlaceholderPlugin.key]: MediaPlaceholderElement,
 	[StrikethroughPlugin.key]: withProps(PlateLeaf, { as: "s" }),
 	[SubscriptPlugin.key]: withProps(PlateLeaf, { as: "sub" }),
-	[SuggestionPlugin.key]: SuggestionLeaf,
 	[SuperscriptPlugin.key]: withProps(PlateLeaf, { as: "sup" }),
 	[TableCellHeaderPlugin.key]: TableCellHeaderElement,
 	[TableCellPlugin.key]: TableCellElement,
@@ -154,7 +147,6 @@ export const editorComponents = {
 	...viewComponents,
 	[AIPlugin.key]: AILeaf,
 	[EmojiInputPlugin.key]: EmojiInputElement,
-	[MentionInputPlugin.key]: MentionInputElement,
 	[SlashInputPlugin.key]: SlashInputElement,
 };
 

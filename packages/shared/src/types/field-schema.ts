@@ -51,14 +51,6 @@ export const RichTextFieldSchema = z.object({
 	default: z.string().optional(),
 });
 
-export const ArrayFieldSchemaBase = z.object({
-	type: z.literal("array"),
-	required: z.boolean().optional(),
-	label: z.string(),
-	min: z.number().optional(),
-	max: z.number().optional(),
-});
-
 // Base schema types without recursive references
 export const BaseFieldSchema = z.union([
 	StringFieldSchema,
@@ -70,10 +62,15 @@ export const BaseFieldSchema = z.union([
 	RichTextFieldSchema,
 ]);
 
-// Define the array field schema with the complete field schema
-export const ArrayFieldSchema = ArrayFieldSchemaBase.extend({
-	of: z.lazy(() => BaseFieldSchema),
-});
+// Array field schema
+export const ArrayFieldSchema = z.object({
+	type: z.literal("array"),
+	required: z.boolean().optional(),
+	label: z.string(),
+	min: z.number().optional(),
+	max: z.number().optional(),
+	of: z.record(BaseFieldSchema),
+  });
 
 const AFieldSchema = z.union([BaseFieldSchema, ArrayFieldSchema]);
 
@@ -83,14 +80,7 @@ export const ExpandFieldSchema = z.object({
 	required: z.boolean().optional(),
 	label: z.string(),
 	description: z.string().optional(),
-	fields: z.array(
-		z.lazy(() => {
-			return z.object({
-				id: z.string(),
-				schema: AFieldSchema,
-			});
-		}),
-	),
+	fields: z.record(AFieldSchema)
 });
 
 // Complete the recursive type definition

@@ -2,6 +2,7 @@ import { CollectionEditor } from "@/components/collection-editor";
 import { useConfig } from "@/components/providers/config-provider";
 import { RootRoute } from "@/routes/__root";
 import { createRoute } from "@tanstack/react-router";
+import { Header } from "../components/header";
 
 export const CollectionEditRoute = createRoute({
 	getParentRoute: () => RootRoute,
@@ -22,6 +23,7 @@ function PostComponent() {
 
 	return (
 		<>
+			<Header title={id} isEditable />
 			<CollectionEditor
 				schema={schema.collections[name]}
 				id={id}

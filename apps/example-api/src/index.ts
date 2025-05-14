@@ -23,12 +23,9 @@ async function ensureCMSInitialized(env: CustomEnv["Bindings"]) {
 	if (!cmsInitialized) {
 		const config = {
 			storage: {
-				type: "dynamodb" as StorageType,
+				type: "sqlite" as StorageType,
 				config: {
-					region: env.DYNAMO_REGION,
-					endpoint: env.DYNAMO_ENDPOINT,
-					accessKeyId: env.DYNAMO_ACCESS_KEY_ID,
-					secretAccessKey: env.DYNAMO_SECRET_ACCESS_KEY,
+					dbPath: "./db.sqlite",
 					tablePrefix: env.DYNAMO_TABLE_PREFIX,
 				},
 			},
